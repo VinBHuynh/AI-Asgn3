@@ -1,5 +1,9 @@
-package main;
+//package main;
 
+import com.opencsv.CSVWriter;
+
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
 
@@ -42,10 +46,11 @@ public class AStar {
         while (!openPath.isEmpty()) {
             Node cur = openPath.peek();
             if(cur.getX() == end.getX() && cur.getY() == end.getY()){
-                score = (int) (100 - cur.getG());
+                score = (int) (100 - cur.getFCost());
                 return cur;
             }
             List<Node> curNeb = findNeighbors(cur);
+            cur.setNeighbors(curNeb);
 
             for(Node neb: curNeb){
                 double totalWeight = cur.getG() + neb.getWeight();
@@ -81,7 +86,7 @@ public class AStar {
         return false;
     }
 
-    public void printPath(Node path){
+    public void printPath(Node path, String board){
         if(path == null){
             return;
         }
@@ -97,18 +102,77 @@ public class AStar {
         Collections.reverse(ns);
         Collections.reverse(moves);
 
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        System.out.println("Score: " + score);
-        System.out.println("Number of actions: " + actions);
-        System.out.println("Number of expanded nodes: " + expandedNode);
-        System.out.println("Series of actions: ");
-        for(String s: moves){
-            System.out.println(s);
+//        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+//        System.out.println("Score: " + score);
+//        System.out.println("Number of actions: " + actions);
+//        System.out.println("Number of expanded nodes: " + expandedNode);
+//        System.out.println("Series of actions: ");
+//        for(String s: moves){
+//            System.out.println(s);
+//        }
+//        for(Node n: ns){
+//            List<Node> nebs = n.getNeighbors();
+//            System.out.println("NEIGHBOR FOR " + n);
+//            for(Node nb: nebs){
+//                System.out.println(nb);
+//            }
+//        }
+
+        try{
+            FileWriter fw = new FileWriter("csvs/training.csv", true);
+            CSVWriter writer = new CSVWriter(fw, '\n', CSVWriter.NO_QUOTE_CHARACTER);
+            Node last = ns.get(ns.size()-1);
+            //last.setNeighbors(findNeighbors(last));
+            int cost = 100 - score;
+            String[] out = new String[ns.size()];
+
+            for(int i=0; i<ns.size(); i++){
+                Node cur = ns.get(i);
+                String coord = ns.get(i).toString();
+                String features = calculateFeatures(cur, last);
+                double dist = PythagoreanDistance(cur, last);
+                double nebAvg;
+                if(cur.compareTo(last) == 0){
+                    nebAvg = 0.0;
+                } else{
+                    nebAvg = avgNeighborCost(cur);
+                }
+
+                int aStarCost = cost - (int) cur.getFCost();
+                out[i] = coord + "," + features + "," + String.valueOf(aStarCost) + "," + nebAvg + "," + dist + "," + board;
+            }
+            writer.writeNext(out);
+            writer.close();
+        } catch(IOException e){
+            e.printStackTrace();
         }
 
-        for(Node n: ns){
-            System.out.println(n);
+
+    }
+
+    private double avgNeighborCost(Node source){
+        int sum = 0;
+        double avg = 0.0;
+        Node theCurrentNode = source;
+        List<Node> neighbors;
+        if(source.getNeighbors().isEmpty()){
+            neighbors = findNeighbors(source);
+        } else{
+            neighbors = theCurrentNode.getNeighbors();
         }
+
+        for(Node neb: neighbors){
+            // Get each complexity here
+            sum += neb.getComplex();
+        }
+        avg += sum/neighbors.size();
+        double scale = Math.pow(10, 1);
+        return Math.round(avg*scale) / scale;
+    }
+    private String calculateFeatures(Node cur, Node last) {
+        int difX = Math.abs(last.getX() - cur.getX());
+        int difY = Math.abs(last.getY() - cur.getY());
+        return difX + "," + difY;
     }
 
     public String checkMove(Node start, Node end){
@@ -321,11 +385,27 @@ public class AStar {
             case 6:
                 h = nonAdmissible(n, end);
                 break;
+            case 7:
+                h = wekaRegression(n, end);
+                break;
             default:
                 h = 0;
                 break;
         }
         return h;
+    }
+
+    private double wekaRegression(Node n, Node end) {
+        int x = n.getX();
+        int y = n.getY();
+        int xdif = Math.abs(end.getX()-x);
+        int ydif = Math.abs(end.getY()-y);
+        double avg = avgNeighborCost(n);
+        double pythag = PythagoreanDistance(n, end);
+        double out = -0.0049 * x + -0.0015 * y +
+                0.7197 * xdif + 0.74 * ydif +
+                0.4351 * avg + 1.4376 * pythag + 0.5511;
+        return out;
     }
 
     private double getLowerDist(Node nodeA, Node nodeB) {
@@ -350,9 +430,20 @@ public class AStar {
 
     private double euclideanDistance(Node nodeA, Node nodeB)
     {
+//        double dx = Math.abs(nodeA.getX() - nodeB.getX());
+//        double dy = Math.abs(nodeA.getY() - nodeB.getY());
+//        return Math.sqrt(dx*dx + dy*dy);
+        return sumDist(nodeA, nodeB) + 1;
+    }
+
+    private double PythagoreanDistance(Node nodeA, Node nodeB)
+    {
         double dx = Math.abs(nodeA.getX() - nodeB.getX());
         double dy = Math.abs(nodeA.getY() - nodeB.getY());
-        return Math.sqrt(dx*dx + dy*dy);
+        double dist = Math.sqrt(dx*dx + dy*dy);
+        double scale = Math.pow(10, 1);
+        return Math.round(dist*scale)/scale;
+        //return sumDist(nodeA, nodeB) + 1;
     }
 
     private double nonAdmissible(Node nodeA, Node nodeB)
