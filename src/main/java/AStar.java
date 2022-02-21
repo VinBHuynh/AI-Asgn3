@@ -102,10 +102,10 @@ public class AStar {
         Collections.reverse(ns);
         Collections.reverse(moves);
 
-//        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-//        System.out.println("Score: " + score);
-//        System.out.println("Number of actions: " + actions);
-//        System.out.println("Number of expanded nodes: " + expandedNode);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("Score: " + score);
+        System.out.println("Number of actions: " + actions);
+        System.out.println("Number of expanded nodes: " + expandedNode);
 //        System.out.println("Series of actions: ");
 //        for(String s: moves){
 //            System.out.println(s);
