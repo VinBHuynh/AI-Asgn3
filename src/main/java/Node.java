@@ -1,4 +1,4 @@
-package main;
+//package main;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +53,7 @@ public class Node implements Comparable<Node>{
     }
 
     public double getFCost() {
-       return f;
+        return f;
     }
     public void setFCost(double f){this.f = f;}
 
@@ -87,7 +87,7 @@ public class Node implements Comparable<Node>{
 
     @Override
     public String toString(){
-        return "Node at ["+ x + ", "+ y + "] with cost of: " + f;
+        return x + ","+ y;
     }
 
 }

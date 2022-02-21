@@ -1,7 +1,9 @@
-package main;
+//package main;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
@@ -9,57 +11,68 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-
-        //take in file name (of the board) and number of which heuristic to use
-        String temp = "";
-        ArrayList<String[]> t = new ArrayList<>();
-        int inputHeuristic = 1;
-        try{
-            File file = new File(args[0]);
-            inputHeuristic = Integer.parseInt((args[1]));
-            Scanner scanner = new Scanner(file);
-            while(scanner.hasNextLine())
-            {
-                temp = scanner.nextLine();
-                String[] line = temp.split("\t");
-                t.add(line);
-            }
-            scanner.close();
-        } catch (FileNotFoundException e) {
+        try {
+            FileWriter fw = new FileWriter("csvs/training.csv");
+            fw.write("");
+        } catch (IOException e) {
             e.printStackTrace();
         }
-
-        int r_len = t.size();
-        int c_len = t.get(0).length;
-        int[][] board = new int[r_len][c_len];
-        Node start = new Node(-1, -1, -1);
-        Node end = new Node(-1, -1, -1);;
-
-        for(int i = 0; i < t.size(); i++)
-        {
-            for (int j = 0; j < t.get(0).length; j++) {
-                if (t.get(i)[j].equals("S")) {
-                    start = new Node(j, i, 1);
-                    start.setDir(0);
-                    board[i][j] = 1;
-                } else if (t.get(i)[j].equals("G")) {
-                    end = new Node(j, i, 1);
-                    board[i][j] = 1;
+        for(int ind=0; ind<2; ind++) {
+            //take in file name (of the board) and number of which heuristic to use
+            System.out.println("START!");
+            String temp = "";
+            ArrayList<String[]> t = new ArrayList<>();
+            int inputHeuristic = 7;
+            try {
+                String filePath = "training/board"+ String.valueOf(ind) + ".txt";
+                //String filePath = "boards/3x3one.txt";
+                File file = new File(filePath);
+                //inputHeuristic = Integer.parseInt((args[1]));
+                Scanner scanner = new Scanner(file);
+                while (scanner.hasNextLine()) {
+                    temp = scanner.nextLine();
+                    String[] line = temp.split("\t");
+                    t.add(line);
                 }
-                else {
-                    board[i][j] = Integer.parseInt(t.get(i)[j]);
+                scanner.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            System.out.println("DONE READ FILE!");
+
+            int r_len = t.size();
+            int c_len = t.get(0).length;
+            int[][] board = new int[r_len][c_len];
+            Node start = new Node(-1, -1, -1);
+            Node end = new Node(-1, -1, -1);
+
+            for (int i = 0; i < t.size(); i++) {
+                for (int j = 0; j < t.get(0).length; j++) {
+                    if (t.get(i)[j].equals("S")) {
+                        start = new Node(j, i, 1);
+                        start.setDir(0);
+                        board[i][j] = 1;
+                    } else if (t.get(i)[j].equals("G")) {
+                        end = new Node(j, i, 1);
+                        board[i][j] = 1;
+                    } else {
+                        board[i][j] = Integer.parseInt(t.get(i)[j]);
+                    }
                 }
             }
-        }
+            System.out.println("DONE INIT BOARD!");
 
-        AStar astar;
-        if (start.getX() == -1 || end.getX() == -1) {
-            System.out.println("Missing start or end node");
-        }
-        else {
-            astar = new AStar(start, end, board, inputHeuristic);
-            Node fullpath = astar.getFullPath();
-            astar.printPath(fullpath);
+            AStar astar;
+            if (start.getX() == -1 || end.getX() == -1) {
+                System.out.println("Missing start or end node");
+            } else {
+                astar = new AStar(start, end, board, inputHeuristic);
+                System.out.println("DONE ASTAR!");
+                Node fullpath = astar.getFullPath();
+                astar.printPath(fullpath, "board"+ind);
+                System.out.println("DONE PRINT PATH!");
+            }
+            System.out.println("ONE DONE!");
         }
     }
 
