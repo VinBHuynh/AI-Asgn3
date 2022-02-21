@@ -86,7 +86,7 @@ public class AStar {
         return false;
     }
 
-    public void printPath(Node path, String board){
+    public void printPath(Node path){
         if(path == null){
             return;
         }
@@ -139,7 +139,7 @@ public class AStar {
                 }
 
                 int aStarCost = cost - (int) cur.getFCost();
-                out[i] = coord + "," + features + "," + String.valueOf(aStarCost) + "," + nebAvg + "," + dist + "," + board;
+                out[i] = coord + "," + features + "," + String.valueOf(aStarCost) + "," + nebAvg + "," + dist;
             }
             writer.writeNext(out);
             writer.close();
