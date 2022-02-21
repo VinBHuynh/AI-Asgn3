@@ -1,9 +1,5 @@
-//package main;
+package main;
 
-import com.opencsv.CSVWriter;
-
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
 
@@ -110,43 +106,9 @@ public class AStar {
             System.out.println(s);
         }
 
-        try{
-            FileWriter fw = new FileWriter("csvs/training.csv");
-            CSVWriter writer = new CSVWriter(fw, '\n', CSVWriter.NO_QUOTE_CHARACTER);
-            Node last = ns.get(ns.size()-1);
-            int cost = 100 - score;
-            String[] out = new String[ns.size()];
-
-            for(int i=0; i<ns.size(); i++){
-                Node cur = ns.get(i);
-
-                String coord = "";
-                if(i == 0){
-                    coord = "S";
-                } else if(i == ns.size()-1){
-                    coord = "G";
-                } else{
-                    coord = ns.get(i).toString();
-                }
-                String features = calculateFeatures(cur, last);
-                int aStarCost = cost - (int) cur.getFCost();
-                out[i] = coord + ", " + features + ", " + String.valueOf(aStarCost);
-            }
-            writer.writeNext(out);
-            writer.close();
-        } catch(IOException e){
-            e.printStackTrace();
-        }
-
         for(Node n: ns){
             System.out.println(n);
         }
-    }
-
-    private String calculateFeatures(Node cur, Node last) {
-        int difX = Math.abs(last.getX() - cur.getX());
-        int difY = Math.abs(last.getY() - cur.getY());
-        return difX + ", " + difY;
     }
 
     public String checkMove(Node start, Node end){
