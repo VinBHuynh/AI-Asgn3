@@ -19,7 +19,6 @@ public class Main {
         }
         for(int ind=0; ind<2; ind++) {
             //take in file name (of the board) and number of which heuristic to use
-            System.out.println("START!");
             String temp = "";
             ArrayList<String[]> t = new ArrayList<>();
             int inputHeuristic = 7;
@@ -38,7 +37,6 @@ public class Main {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-            System.out.println("DONE READ FILE!");
 
             int r_len = t.size();
             int c_len = t.get(0).length;
@@ -60,19 +58,15 @@ public class Main {
                     }
                 }
             }
-            System.out.println("DONE INIT BOARD!");
 
             AStar astar;
             if (start.getX() == -1 || end.getX() == -1) {
                 System.out.println("Missing start or end node");
             } else {
                 astar = new AStar(start, end, board, inputHeuristic);
-                System.out.println("DONE ASTAR!");
                 Node fullpath = astar.getFullPath();
                 astar.printPath(fullpath, "board"+ind);
-                System.out.println("DONE PRINT PATH!");
             }
-            System.out.println("ONE DONE!");
         }
     }
 
